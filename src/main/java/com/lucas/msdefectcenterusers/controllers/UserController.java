@@ -15,24 +15,26 @@ import java.util.Optional;
 import java.util.UUID;
 
 @RestController
+@RequestMapping("/users")
 public class UserController {
 
     @Autowired
     UserRepository userRepository;
 
-    @PostMapping("/users")
+    @PostMapping()
     public ResponseEntity<UserModel> saveUser(@RequestBody @Valid UserRecordDTO userRecordDTO) {
-        var productModel = new UserModel();
-        BeanUtils.copyProperties(userRecordDTO, productModel);
-        return ResponseEntity.status(HttpStatus.CREATED).body(userRepository.save(productModel));
+        var userModel = new UserModel();
+        userModel.setStatus("active");
+        BeanUtils.copyProperties(userRecordDTO, userModel);
+        return ResponseEntity.status(HttpStatus.CREATED).body(userRepository.save(userModel));
     }
 
-    @GetMapping("/users")
+    @GetMapping()
     public ResponseEntity<List<UserModel>> getAllUsers(){
         return ResponseEntity.status(HttpStatus.OK).body(userRepository.findAll());
     }
 
-    @GetMapping("/users/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<Object> FindUserById(@PathVariable(value="id") UUID id){
         Optional<UserModel> user = userRepository.findById(id);
         if(user.isEmpty()) {
@@ -41,7 +43,7 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(user.get());
     }
 
-    @DeleteMapping("/users/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Object> deleteUser(@PathVariable(value="id") UUID id) {
         Optional<UserModel> user = userRepository.findById(id);
         if(user.isEmpty()) {
@@ -51,15 +53,15 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body("User deleted successfully.");
     }
 
-    @PutMapping("/users/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<Object> updateUser(@PathVariable(value="id") UUID id,
                                                 @RequestBody @Valid UserRecordDTO userRecordDto) {
-        Optional<UserModel> productO = userRepository.findById(id);
-        if(productO.isEmpty()) {
+        Optional<UserModel> user = userRepository.findById(id);
+        if(user.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Product not found.");
         }
-        var productModel = productO.get();
-        BeanUtils.copyProperties(userRecordDto, productModel);
-        return ResponseEntity.status(HttpStatus.OK).body(userRepository.save(productModel));
+        var userModel = user.get();
+        BeanUtils.copyProperties(userRecordDto, userModel);
+        return ResponseEntity.status(HttpStatus.OK).body(userRepository.save(userModel));
     }
 }
